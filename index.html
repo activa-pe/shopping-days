@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Día del Shopping — Registro de regalos</title>
+<title>Shopping Days — Registro de regalos</title>
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎁</text></svg>">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -49,8 +49,6 @@ button,input,select{font:inherit;color:inherit}
 .hero h1{margin:26px 0 6px;font-size:clamp(46px,14vw,74px);line-height:.88;font-weight:800;font-stretch:62%;letter-spacing:-.01em}
 .hero .fechas{display:inline-block;background:var(--orange);color:#fff;font-weight:700;padding:5px 10px;border-radius:4px;font-size:15px}
 .hero p{margin:14px 0 0;max-width:40ch;color:#D4DAF3}
-.chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:14px}
-.chips span{border:1px solid rgba(255,255,255,.35);border-radius:999px;padding:3px 10px;font-size:13px;color:#fff}
 
 /* ---------- Formulario ---------- */
 main{padding:10px 0 40px}
@@ -194,10 +192,9 @@ td .btn{height:34px;font-size:13px;padding:0 12px;white-space:nowrap}
   <header class="hero">
     <div class="wrap">
       <div class="brands"><span>entel</span><span class="honor">HONOR</span></div>
-      <h1>Día del<br>Shopping</h1>
+      <h1>Shopping<br>Days</h1>
       <span class="fechas">25 al 27 de setiembre</span>
       <p>Registra el regalo del cliente apenas termine la venta del equipo.</p>
-      <div class="chips"><span>Línea Postpago</span><span>Cuota inicial S/0</span><span>12 cuotas</span></div>
     </div>
   </header>
 
@@ -258,16 +255,23 @@ td .btn{height:34px;font-size:13px;padding:0 12px;white-space:nowrap}
 
       <section class="step">
         <h2><span class="n">3</span>Tienda donde se vendió</h2>
-        <div class="field" id="f-region">
-          <label for="region">Región</label>
-          <select id="region"><option value="">Selecciona la región</option></select>
-          <div class="err">Selecciona la región.</div>
+        <div class="row2">
+          <div class="field" id="f-departamento">
+            <label for="departamento">Departamento</label>
+            <select id="departamento"><option value="">Selecciona</option></select>
+            <div class="err">Selecciona el departamento.</div>
+          </div>
+          <div class="field" id="f-provincia">
+            <label for="provincia">Provincia</label>
+            <select id="provincia" disabled><option value="">—</option></select>
+            <div class="err">Selecciona la provincia.</div>
+          </div>
         </div>
         <div class="field" id="f-tienda">
-          <label for="tienda">Tienda</label>
-          <select id="tienda" disabled><option value="">Primero elige la región</option></select>
+          <label for="tienda">Nombre de la tienda</label>
+          <input type="text" id="tienda" autocomplete="off" maxlength="80" placeholder="Ej.: Entel Jockey Plaza">
           <div class="hint">Aquí se entregará el regalo.</div>
-          <div class="err">Selecciona la tienda.</div>
+          <div class="err">Escribe el nombre de la tienda.</div>
         </div>
       </section>
 
@@ -331,7 +335,7 @@ td .btn{height:34px;font-size:13px;padding:0 12px;white-space:nowrap}
   <header class="panel-head">
     <div class="wrap">
       <div class="top">
-        <div class="brands"><span>Día del Shopping</span></div>
+        <div class="brands"><span>Shopping Days</span></div>
         <div style="display:flex;gap:8px">
           <button class="btn ghost" id="btnRefrescar" type="button">Actualizar</button>
           <button class="btn ghost" id="btnSalir" type="button">Salir</button>
@@ -357,17 +361,16 @@ td .btn{height:34px;font-size:13px;padding:0 12px;white-space:nowrap}
       <div class="box">
         <h2>Clientes registrados</h2>
         <div class="filters">
-          <div><label for="fBuscar">Buscar</label><input id="fBuscar" type="text" placeholder="Nombre, DNI o código"></div>
+          <div><label for="fBuscar">Buscar</label><input id="fBuscar" type="text" placeholder="Nombre, DNI, código o tienda"></div>
           <div><label for="fEstado">Estado</label><select id="fEstado"><option value="">Todos</option><option>Pendiente</option><option>Entregado</option></select></div>
           <div><label for="fRegalo">Regalo</label><select id="fRegalo"><option value="">Todos</option><option value="HONOR_600">Robot Vacuum Cleaner</option><option value="HONOR_600E">Hair Dryer</option></select></div>
-          <div><label for="fRegion">Región</label><select id="fRegion"><option value="">Todas</option></select></div>
-          <div><label for="fCanal">Canal</label><select id="fCanal"><option value="">Todos</option><option>Tiendas</option><option>GGSS</option></select></div>
-          <div><label for="fTienda">Tienda</label><select id="fTienda"><option value="">Todas</option></select></div>
+          <div><label for="fDepartamento">Departamento</label><select id="fDepartamento"><option value="">Todos</option></select></div>
+          <div><label for="fProvincia">Provincia</label><select id="fProvincia"><option value="">Todas</option></select></div>
         </div>
         <div class="count" id="conteo"></div>
         <div class="table-wrap">
           <table>
-            <thead><tr><th>Código</th><th>Fecha</th><th>Cliente</th><th>DNI</th><th>Celular</th><th>Regalo</th><th>Canal</th><th>Tienda</th><th>Boleta</th><th>Estado</th><th></th></tr></thead>
+            <thead><tr><th>Código</th><th>Fecha</th><th>Cliente</th><th>DNI</th><th>Celular</th><th>Regalo</th><th>Tienda</th><th>Boleta</th><th>Estado</th><th></th></tr></thead>
             <tbody id="tbody"></tbody>
           </table>
         </div>
@@ -383,7 +386,7 @@ const API_URL = 'https://script.google.com/macros/s/AKfycbwBdQF3fAUvgCtfmPEYouA9
 
 const $ = (s) => document.querySelector(s);
 const configurado = API_URL.startsWith('https://script.google.com/');
-let tiendas = [];
+const PERU = {"Amazonas": ["Chachapoyas", "Bagua", "Bongará", "Condorcanqui", "Luya", "Rodríguez de Mendoza", "Utcubamba"], "Áncash": ["Huaraz", "Aija", "Antonio Raymondi", "Asunción", "Bolognesi", "Carhuaz", "Carlos Fermín Fitzcarrald", "Casma", "Corongo", "Huari", "Huarmey", "Huaylas", "Mariscal Luzuriaga", "Ocros", "Pallasca", "Pomabamba", "Recuay", "Santa", "Sihuas", "Yungay"], "Apurímac": ["Abancay", "Andahuaylas", "Antabamba", "Aymaraes", "Cotabambas", "Chincheros", "Grau"], "Arequipa": ["Arequipa", "Camaná", "Caravelí", "Castilla", "Caylloma", "Condesuyos", "Islay", "La Unión"], "Ayacucho": ["Huamanga", "Cangallo", "Huanca Sancos", "Huanta", "La Mar", "Lucanas", "Parinacochas", "Páucar del Sara Sara", "Sucre", "Víctor Fajardo", "Vilcas Huamán"], "Cajamarca": ["Cajamarca", "Cajabamba", "Celendín", "Chota", "Contumazá", "Cutervo", "Hualgayoc", "Jaén", "San Ignacio", "San Marcos", "San Miguel", "San Pablo", "Santa Cruz"], "Callao": ["Callao"], "Cusco": ["Cusco", "Acomayo", "Anta", "Calca", "Canas", "Canchis", "Chumbivilcas", "Espinar", "La Convención", "Paruro", "Paucartambo", "Quispicanchi", "Urubamba"], "Huancavelica": ["Huancavelica", "Acobamba", "Angaraes", "Castrovirreyna", "Churcampa", "Huaytará", "Tayacaja"], "Huánuco": ["Huánuco", "Ambo", "Dos de Mayo", "Huacaybamba", "Huamalíes", "Leoncio Prado", "Marañón", "Pachitea", "Puerto Inca", "Lauricocha", "Yarowilca"], "Ica": ["Ica", "Chincha", "Nasca", "Palpa", "Pisco"], "Junín": ["Huancayo", "Concepción", "Chanchamayo", "Jauja", "Junín", "Satipo", "Tarma", "Yauli", "Chupaca"], "La Libertad": ["Trujillo", "Ascope", "Bolívar", "Chepén", "Julcán", "Otuzco", "Pacasmayo", "Pataz", "Sánchez Carrión", "Santiago de Chuco", "Gran Chimú", "Virú"], "Lambayeque": ["Chiclayo", "Ferreñafe", "Lambayeque"], "Lima": ["Lima", "Barranca", "Cajatambo", "Canta", "Cañete", "Huaral", "Huarochirí", "Huaura", "Oyón", "Yauyos"], "Loreto": ["Maynas", "Alto Amazonas", "Loreto", "Mariscal Ramón Castilla", "Requena", "Ucayali", "Datem del Marañón", "Putumayo"], "Madre de Dios": ["Tambopata", "Manu", "Tahuamanu"], "Moquegua": ["Mariscal Nieto", "General Sánchez Cerro", "Ilo"], "Pasco": ["Pasco", "Daniel Alcides Carrión", "Oxapampa"], "Piura": ["Piura", "Ayabaca", "Huancabamba", "Morropón", "Paita", "Sullana", "Talara", "Sechura"], "Puno": ["Puno", "Azángaro", "Carabaya", "Chucuito", "El Collao", "Huancané", "Lampa", "Melgar", "Moho", "San Antonio de Putina", "San Román", "Sandia", "Yunguyo"], "San Martín": ["Moyobamba", "Bellavista", "El Dorado", "Huallaga", "Lamas", "Mariscal Cáceres", "Picota", "Rioja", "San Martín", "Tocache"], "Tacna": ["Tacna", "Candarave", "Jorge Basadre", "Tarata"], "Tumbes": ["Tumbes", "Contralmirante Villar", "Zarumilla"], "Ucayali": ["Coronel Portillo", "Atalaya", "Padre Abad", "Purús"]};
 let stock = {};
 let boletaDataUrl = null;
 let pinActual = null;
@@ -391,7 +394,6 @@ let registros = [];
 let ultimoStock = {};
 
 /* ---------- Utilidades ---------- */
-function regionLabel(r){ return String(r).replace(/^Region\s+/i,''); }
 function esc(s){ return String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
 function guardar(k,v){ try{ localStorage.setItem(k,v); }catch(e){} }
 function leer(k){ try{ return localStorage.getItem(k); }catch(e){ return null; } }
@@ -415,8 +417,6 @@ async function cargarConfig(){
   try{
     const res = await apiGet('config');
     if (!res.ok) throw new Error(res.error);
-    tiendas = res.tiendas || [];
-    pintarRegiones();
     aplicarStock(res.stock);
     aplicarCampania(res.campania);
   }catch(err){
@@ -460,30 +460,28 @@ function aplicarStock(s){
   });
 }
 
-function pintarRegiones(){
-  const regiones = [...new Set(tiendas.map(t => t.region))].sort();
-  const sel = $('#region');
-  sel.innerHTML = '<option value="">Selecciona la región</option>' + regiones.map(r => `<option value="${esc(r)}">${esc(regionLabel(r))}</option>`).join('');
-  const rGuardada = leer('ds_region');
-  if (rGuardada && regiones.includes(rGuardada)){
-    sel.value = rGuardada; pintarTiendas();
-    const tGuardada = leer('ds_tienda');
-    if (tGuardada && [...$('#tienda').options].some(o => o.value === tGuardada)) $('#tienda').value = tGuardada;
+const ordenar = (arr) => [...arr].sort((x, y) => x.localeCompare(y, 'es'));
+
+function pintarDepartamentos(){
+  const sel = $('#departamento');
+  sel.innerHTML = '<option value="">Selecciona</option>' + ordenar(Object.keys(PERU)).map(d => `<option value="${esc(d)}">${esc(d)}</option>`).join('');
+  const dGuardado = leer('sd_departamento');
+  if (dGuardado && PERU[dGuardado]){
+    sel.value = dGuardado; pintarProvincias();
+    const pGuardada = leer('sd_provincia');
+    if (pGuardada && PERU[dGuardado].includes(pGuardada)) $('#provincia').value = pGuardada;
   }
+  const tGuardada = leer('sd_tienda');
+  if (tGuardada) $('#tienda').value = tGuardada;
 }
 
-function pintarTiendas(){
-  const region = $('#region').value;
-  const sel = $('#tienda');
-  if (!region){ sel.innerHTML = '<option value="">Primero elige la región</option>'; sel.disabled = true; return; }
-  const lista = tiendas.filter(t => t.region === region);
-  const grupos = {};
-  lista.forEach(t => { (grupos[t.canal] = grupos[t.canal] || []).push(t.tienda); });
-  let html = '<option value="">Selecciona la tienda</option>';
-  Object.keys(grupos).sort((a,b)=> a==='Tiendas' ? -1 : b==='Tiendas' ? 1 : a.localeCompare(b)).forEach(c => {
-    html += `<optgroup label="${esc(c)}">` + grupos[c].sort().map(t => `<option value="${esc(t)}">${esc(t)}</option>`).join('') + '</optgroup>';
-  });
-  sel.innerHTML = html; sel.disabled = false;
+function pintarProvincias(){
+  const dep = $('#departamento').value;
+  const sel = $('#provincia');
+  if (!dep){ sel.innerHTML = '<option value="">—</option>'; sel.disabled = true; return; }
+  const lista = PERU[dep];
+  sel.innerHTML = (lista.length > 1 ? '<option value="">Selecciona</option>' : '') + ordenar(lista).map(p => `<option value="${esc(p)}">${esc(p)}</option>`).join('');
+  sel.disabled = false;
 }
 
 /* ---------- Foto de boleta ---------- */
@@ -527,12 +525,14 @@ $('#boleta').addEventListener('change', async (e) => {
 
 /* ---------- Validación ---------- */
 ['dni','celular'].forEach(id => $('#'+id).addEventListener('input', e => { e.target.value = e.target.value.replace(/\D/g,''); }));
-$('#region').addEventListener('change', () => { pintarTiendas(); guardar('ds_region', $('#region').value); });
-$('#tienda').addEventListener('change', () => guardar('ds_tienda', $('#tienda').value));
+$('#departamento').addEventListener('change', () => {
+  pintarProvincias(); guardar('sd_departamento', $('#departamento').value);
+  guardar('sd_provincia', $('#provincia').value); $('#f-departamento').classList.remove('invalid');
+});
+$('#provincia').addEventListener('change', () => { guardar('sd_provincia', $('#provincia').value); $('#f-provincia').classList.remove('invalid'); });
+$('#tienda').addEventListener('change', () => guardar('sd_tienda', $('#tienda').value.trim()));
 document.querySelectorAll('input[name=producto]').forEach(r => r.addEventListener('change', () => $('#f-producto').classList.remove('invalid')));
-['nombre','dni','celular','region','tienda'].forEach(id => $('#'+id).addEventListener('input', () => $('#f-'+id).classList.remove('invalid')));
-$('#tienda').addEventListener('change', () => $('#f-tienda').classList.remove('invalid'));
-$('#region').addEventListener('change', () => $('#f-region').classList.remove('invalid'));
+['nombre','dni','celular','tienda'].forEach(id => $('#'+id).addEventListener('input', () => $('#f-'+id).classList.remove('invalid')));
 
 function validar(){
   const prod = document.querySelector('input[name=producto]:checked');
@@ -542,8 +542,9 @@ function validar(){
     nombre: nombre.length >= 5 && nombre.includes(' '),
     dni: /^\d{8}$/.test($('#dni').value),
     celular: /^9\d{8}$/.test($('#celular').value),
-    region: !!$('#region').value,
-    tienda: !!$('#tienda').value,
+    departamento: !!$('#departamento').value,
+    provincia: !!$('#provincia').value,
+    tienda: $('#tienda').value.trim().length >= 3,
     boleta: !!boletaDataUrl
   };
   let primero = null;
@@ -554,7 +555,8 @@ function validar(){
   if (primero) primero.scrollIntoView({behavior:'smooth', block:'center'});
   return primero ? null : {
     accion:'registrar', productoId: prod.value, nombre, dni: $('#dni').value,
-    celular: $('#celular').value, tienda: $('#tienda').value, boleta: boletaDataUrl
+    celular: $('#celular').value, departamento: $('#departamento').value,
+    provincia: $('#provincia').value, tienda: $('#tienda').value.trim(), boleta: boletaDataUrl
   };
 }
 
@@ -575,7 +577,8 @@ $('#form').addEventListener('submit', async (e) => {
     $('#exDni').textContent = res.dni;
     $('#exEquipo').textContent = res.equipo;
     $('#exRegalo').textContent = res.regalo;
-    $('#exTienda').textContent = res.tienda;
+    $('#exTienda').textContent = res.tienda + ' (' + $('#provincia').value + ', ' + $('#departamento').value + ')';
+    guardar('sd_tienda', res.tienda);
     $('#form').classList.add('hidden');
     $('#exito').classList.remove('hidden');
     window.scrollTo({top: $('#exito').offsetTop - 20, behavior:'smooth'});
@@ -592,7 +595,7 @@ function mostrarError(msg){
 }
 
 $('#btnOtro').addEventListener('click', () => {
-  // Se conservan región y tienda (mismo promotor)
+  // Se conservan departamento, provincia y tienda (mismo promotor)
   document.querySelectorAll('input[name=producto]').forEach(r => r.checked = false);
   ['nombre','dni','celular'].forEach(id => $('#'+id).value = '');
   $('#boleta').value = ''; boletaDataUrl = null;
@@ -642,19 +645,19 @@ function abrirPanel(res){
 function cargarPanelDatos(res){
   registros = res.registros || [];
   pintarStats(res.stock || {});
-  const regiones = [...new Set(registros.map(r => r.region))].sort();
-  const selR = $('#fRegion'), vR = selR.value;
-  selR.innerHTML = '<option value="">Todas</option>' + regiones.map(r => `<option value="${esc(r)}">${esc(regionLabel(r))}</option>`).join('');
-  selR.value = regiones.includes(vR) ? vR : '';
-  pintarFiltroTiendas();
+  const deps = ordenar(new Set(registros.map(r => r.departamento)));
+  const selD = $('#fDepartamento'), vD = selD.value;
+  selD.innerHTML = '<option value="">Todos</option>' + deps.map(d => `<option value="${esc(d)}">${esc(d)}</option>`).join('');
+  selD.value = deps.includes(vD) ? vD : '';
+  pintarFiltroProvincias();
   pintarTabla();
 }
 
-function pintarFiltroTiendas(){
-  const reg = $('#fRegion').value;
-  const lista = [...new Set(registros.filter(r => !reg || r.region === reg).map(r => r.tienda))].sort();
-  const sel = $('#fTienda'), v = sel.value;
-  sel.innerHTML = '<option value="">Todas</option>' + lista.map(t => `<option value="${esc(t)}">${esc(t)}</option>`).join('');
+function pintarFiltroProvincias(){
+  const dep = $('#fDepartamento').value;
+  const lista = ordenar(new Set(registros.filter(r => !dep || r.departamento === dep).map(r => r.provincia)));
+  const sel = $('#fProvincia'), v = sel.value;
+  sel.innerHTML = '<option value="">Todas</option>' + lista.map(p => `<option value="${esc(p)}">${esc(p)}</option>`).join('');
   sel.value = lista.includes(v) ? v : '';
 }
 
@@ -677,12 +680,12 @@ function pintarStats(s){
 
 function filtrados(){
   const q = $('#fBuscar').value.trim().toLowerCase();
-  const est = $('#fEstado').value, reg = $('#fRegalo').value, region = $('#fRegion').value,
-        canal = $('#fCanal').value, tienda = $('#fTienda').value;
+  const est = $('#fEstado').value, reg = $('#fRegalo').value,
+        dep = $('#fDepartamento').value, prov = $('#fProvincia').value;
   return registros.filter(r =>
-    (!est || r.estado === est) && (!reg || r.productoId === reg) && (!region || r.region === region) &&
-    (!canal || r.canal === canal) && (!tienda || r.tienda === tienda) &&
-    (!q || [r.nombre, r.dni, r.codigo, r.celular].join(' ').toLowerCase().includes(q))
+    (!est || r.estado === est) && (!reg || r.productoId === reg) &&
+    (!dep || r.departamento === dep) && (!prov || r.provincia === prov) &&
+    (!q || [r.nombre, r.dni, r.codigo, r.celular, r.tienda].join(' ').toLowerCase().includes(q))
   );
 }
 
@@ -690,7 +693,7 @@ function pintarTabla(){
   const lista = filtrados();
   $('#conteo').textContent = lista.length + (lista.length === 1 ? ' resultado' : ' resultados');
   if (!lista.length){
-    $('#tbody').innerHTML = `<tr><td colspan="11" class="empty">${registros.length ? 'Ningún registro coincide con los filtros.' : 'Aún no hay registros. Aparecerán aquí apenas un promotor registre el primer regalo.'}</td></tr>`;
+    $('#tbody').innerHTML = `<tr><td colspan="10" class="empty">${registros.length ? 'Ningún registro coincide con los filtros.' : 'Aún no hay registros. Aparecerán aquí apenas un promotor registre el primer regalo.'}</td></tr>`;
     return;
   }
   $('#tbody').innerHTML = lista.map(r => {
@@ -703,8 +706,7 @@ function pintarTabla(){
       <td>${esc(r.dni)}</td>
       <td>${esc(r.celular)}</td>
       <td>${esc(regaloCorto)}<br><span style="color:var(--muted)">${esc(r.equipo)}</span></td>
-      <td>${esc(r.canal)}</td>
-      <td>${esc(r.tienda)}<br><span style="color:var(--muted)">${esc(regionLabel(r.region))}</span></td>
+      <td>${esc(r.tienda)}<br><span style="color:var(--muted)">${esc(r.provincia)}, ${esc(r.departamento)}</span></td>
       <td>${r.boleta ? `<a href="${esc(r.boleta)}" target="_blank" rel="noopener">Ver foto</a>` : '—'}</td>
       <td><span class="tag ${entregado ? 'entr' : 'pend'}">${esc(r.estado)}</span>${entregado && r.fechaEntrega ? `<br><span style="color:var(--muted);font-size:12px">${esc(r.fechaEntrega)}</span>` : ''}</td>
       <td><button class="btn ${entregado ? 'ghost' : 'blue'}" data-codigo="${esc(r.codigo)}" data-estado="${entregado ? 'Pendiente' : 'Entregado'}">${entregado ? 'Volver a pendiente' : 'Marcar entregado'}</button></td>
@@ -732,8 +734,8 @@ $('#tbody').addEventListener('click', async (e) => {
 // El stock no cambia al marcar entregas; se reutiliza el último resumen recibido
 function stockDesdeRegistros(){ return ultimoStock; }
 
-['fBuscar','fEstado','fRegalo','fCanal','fTienda'].forEach(id => $('#'+id).addEventListener('input', pintarTabla));
-$('#fRegion').addEventListener('change', () => { pintarFiltroTiendas(); pintarTabla(); });
+['fBuscar','fEstado','fRegalo','fProvincia'].forEach(id => $('#'+id).addEventListener('input', pintarTabla));
+$('#fDepartamento').addEventListener('change', () => { pintarFiltroProvincias(); pintarTabla(); });
 
 $('#btnRefrescar').addEventListener('click', async () => {
   const b = $('#btnRefrescar'); b.disabled = true; b.textContent = 'Actualizando…';
@@ -772,7 +774,7 @@ $('#btnQr').addEventListener('click', async () => {
       const canvas = holder.querySelector('canvas');
       if (!canvas) return;
       const a = document.createElement('a');
-      a.href = canvas.toDataURL('image/png'); a.download = 'QR-Dia-del-Shopping.png';
+      a.href = canvas.toDataURL('image/png'); a.download = 'QR-Shopping-Days.png';
       a.className = 'btn ghost'; a.textContent = 'Descargar QR'; a.style.textDecoration = 'none';
       out.appendChild(a);
     }, 150);
@@ -780,6 +782,7 @@ $('#btnQr').addEventListener('click', async () => {
 });
 
 /* ---------- Inicio ---------- */
+pintarDepartamentos();
 cargarConfig();
 setInterval(() => { if (!document.hidden && !$('#vistaForm').classList.contains('hidden')) refrescarStock(); }, 60000);
 document.addEventListener('visibilitychange', () => { if (!document.hidden) refrescarStock(); });
