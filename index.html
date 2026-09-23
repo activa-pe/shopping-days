@@ -82,6 +82,8 @@ main{padding:10px 0 40px}
 .ticket.agotado{cursor:not-allowed;opacity:.62}
 .ticket.agotado .left{color:var(--err)}
 .ticket.agotado .bar i{background:var(--err)}
+.ticket.bloqueado{opacity:.35;cursor:not-allowed;filter:grayscale(1)}
+.cambiar{display:block;margin:10px auto 0;background:none;border:none;color:var(--blue);font-weight:700;font-size:15px;text-decoration:underline;cursor:pointer;padding:6px}
 
 .field{margin-bottom:14px}
 .qty{display:flex;align-items:center;gap:14px;margin-top:16px;background:#fff;border:2px solid var(--line);border-radius:10px;padding:12px 14px}
@@ -239,6 +241,7 @@ td .btn{height:34px;font-size:13px;padding:0 12px;white-space:nowrap}
           </div>
           <div class="err">Selecciona el equipo que vendiste.</div>
         </div>
+        <button type="button" class="cambiar hidden" id="btnCambiar">Cambiar equipo</button>
         <div class="qty hidden" id="qtyBox">
           <div class="lbl"><span id="qtyTitulo">Cantidad</span><small>Un regalo por cada equipo comprado</small></div>
           <button type="button" id="qtyMenos" aria-label="Restar uno">−</button>
@@ -323,6 +326,7 @@ td .btn{height:34px;font-size:13px;padding:0 12px;white-space:nowrap}
       </dl>
       <p class="keep">Guarda este código y muestra tu DNI al recoger tu regalo.</p>
       <button class="btn primary" id="btnOtro" type="button">Registrar otro cliente</button>
+      <button class="btn ghost" id="btnMismo" type="button" style="width:100%;margin-top:10px;height:50px">Registrar otro equipo para este cliente</button>
     </section>
 
     <p class="legal">Válido del 25/09 al 27/09/2026 o hasta agotar stock. Stock: 100 Honor Choice Robot Vacuum Cleaner y 50 Honor Choice Hair Dryer a nivel nacional. Un regalo por cada equipo Honor 600 u Honor 600e comprado. Condiciones en entel.pe/términos-y-condiciones/</p>
@@ -469,14 +473,12 @@ function aplicarStock(s){
       t.classList.add('agotado');
       t.querySelector('.left').textContent = 'Agotado';
       if (input.checked) input.checked = false;
-      input.disabled = true;
     } else {
       t.classList.remove('agotado');
-      input.disabled = false;
       t.querySelector('.left').textContent = 'Quedan ' + d.disponibles + ' de ' + d.stock;
     }
   });
-  pintarCantidad();
+  estadoTickets();
 }
 
 const ordenar = (arr) => [...arr].sort((x, y) => x.localeCompare(y, 'es'));
@@ -487,6 +489,24 @@ function maxCantidad(){
   const disp = prod && stock[prod.value] ? stock[prod.value].disponibles : Infinity;
   return Math.max(1, disp);
 }
+// Con un equipo elegido, el otro queda bloqueado hasta tocar "Cambiar equipo"
+function estadoTickets(){
+  const prod = document.querySelector('input[name=producto]:checked');
+  document.querySelectorAll('.ticket').forEach(t => {
+    const input = t.querySelector('input');
+    const bloqueado = !!prod && input !== prod;
+    t.classList.toggle('bloqueado', bloqueado);
+    input.disabled = bloqueado || t.classList.contains('agotado');
+    t.setAttribute('aria-disabled', input.disabled ? 'true' : 'false');
+  });
+  $('#btnCambiar').classList.toggle('hidden', !prod);
+  pintarCantidad();
+}
+$('#btnCambiar').addEventListener('click', () => {
+  document.querySelectorAll('input[name=producto]').forEach(r => r.checked = false);
+  cantidad = 1; estadoTickets();
+});
+
 function pintarCantidad(){
   const prod = document.querySelector('input[name=producto]:checked');
   $('#qtyBox').classList.toggle('hidden', !prod);
@@ -568,7 +588,7 @@ $('#departamento').addEventListener('change', () => {
 });
 $('#provincia').addEventListener('change', () => { guardar('sd_provincia', $('#provincia').value); $('#f-provincia').classList.remove('invalid'); });
 $('#tienda').addEventListener('change', () => guardar('sd_tienda', $('#tienda').value.trim()));
-document.querySelectorAll('input[name=producto]').forEach(r => r.addEventListener('change', () => { $('#f-producto').classList.remove('invalid'); pintarCantidad(); }));
+document.querySelectorAll('input[name=producto]').forEach(r => r.addEventListener('change', () => { $('#f-producto').classList.remove('invalid'); cantidad = 1; estadoTickets(); }));
 ['nombre','dni','celular','tienda'].forEach(id => $('#'+id).addEventListener('input', () => $('#f-'+id).classList.remove('invalid')));
 
 function validar(){
@@ -632,10 +652,20 @@ function mostrarError(msg){
   b.scrollIntoView({behavior:'smooth', block:'center'});
 }
 
+// Mismo cliente: conserva datos, tienda y foto de boleta; solo se elige el otro equipo
+$('#btnMismo').addEventListener('click', () => {
+  document.querySelectorAll('input[name=producto]').forEach(r => r.checked = false);
+  cantidad = 1; estadoTickets();
+  $('#formError').classList.add('hidden');
+  $('#exito').classList.add('hidden'); $('#form').classList.remove('hidden');
+  window.scrollTo({top: $('#form').offsetTop - 10, behavior:'smooth'});
+  refrescarStock();
+});
+
 $('#btnOtro').addEventListener('click', () => {
   // Se conservan departamento, provincia y tienda (mismo promotor)
   document.querySelectorAll('input[name=producto]').forEach(r => r.checked = false);
-  cantidad = 1; pintarCantidad();
+  cantidad = 1; estadoTickets();
   ['nombre','dni','celular'].forEach(id => $('#'+id).value = '');
   $('#boleta').value = ''; boletaDataUrl = null;
   $('#uploadBox').classList.remove('has'); $('#thumb').style.backgroundImage = '';
