@@ -84,6 +84,15 @@ main{padding:10px 0 40px}
 .ticket.agotado .bar i{background:var(--err)}
 
 .field{margin-bottom:14px}
+.qty{display:flex;align-items:center;gap:14px;margin-top:16px;background:#fff;border:2px solid var(--line);border-radius:10px;padding:12px 14px}
+.qty .lbl{flex:1;font-weight:650;font-size:15px}
+.qty .lbl small{display:block;font-weight:400;color:var(--muted);font-size:13px}
+.qty button{width:44px;height:44px;border-radius:8px;border:2px solid var(--line);background:#fff;font-size:22px;font-weight:700;cursor:pointer;line-height:1}
+.qty button:disabled{opacity:.35;cursor:not-allowed}
+.qty output{min-width:28px;text-align:center;font-size:22px;font-weight:800}
+.done .warn{background:#FFF3E6;color:#8A3B00;padding:10px 12px;border-radius:8px;font-size:14px;margin-top:10px}
+td .tag.rev{background:#FFF0E6;color:#A34200}
+td .tag.okb{background:var(--ok-bg);color:var(--ok)}
 .field label{display:block;font-weight:650;margin-bottom:5px;font-size:15px}
 .field .hint{font-size:13px;color:var(--muted);margin-top:4px}
 .field input[type=text],.field input[type=tel],.field select{
@@ -98,7 +107,7 @@ main{padding:10px 0 40px}
 .row2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
 @media (max-width:380px){.row2{grid-template-columns:1fr}}
 
-.upload{display:flex;align-items:center;gap:14px;border:2px dashed var(--line);border-radius:10px;background:#fff;padding:14px;cursor:pointer;min-height:84px}
+.field .upload,.upload{display:flex;align-items:center;gap:14px;border:2px dashed var(--line);border-radius:10px;background:#fff;padding:14px;cursor:pointer;min-height:84px}
 .upload input{position:absolute;width:1px;height:1px;opacity:0}
 .upload:focus-within{border-color:var(--blue)}
 .upload .thumb{width:56px;height:56px;border-radius:6px;background:#EEF0F6 center/cover no-repeat;flex:none;display:grid;place-items:center}
@@ -230,6 +239,12 @@ td .btn{height:34px;font-size:13px;padding:0 12px;white-space:nowrap}
           </div>
           <div class="err">Selecciona el equipo que vendiste.</div>
         </div>
+        <div class="qty hidden" id="qtyBox">
+          <div class="lbl"><span id="qtyTitulo">Cantidad</span><small>Un regalo por cada equipo comprado</small></div>
+          <button type="button" id="qtyMenos" aria-label="Restar uno">−</button>
+          <output id="qty" aria-live="polite">1</output>
+          <button type="button" id="qtyMas" aria-label="Sumar uno">+</button>
+        </div>
       </section>
 
       <section class="step">
@@ -298,6 +313,7 @@ td .btn{height:34px;font-size:13px;padding:0 12px;white-space:nowrap}
       <div class="code-lbl">Código de registro</div>
       <div class="code" id="exCodigo">—</div>
       <div class="msg">Te contactaremos cuando el regalo esté en tienda.</div>
+      <div class="warn hidden" id="exRevisar">La boleta quedó marcada para revisión. El equipo la revisará; no hace falta volver a registrar.</div>
       <dl>
         <dt>Cliente</dt><dd id="exNombre"></dd>
         <dt>DNI</dt><dd id="exDni"></dd>
@@ -309,7 +325,7 @@ td .btn{height:34px;font-size:13px;padding:0 12px;white-space:nowrap}
       <button class="btn primary" id="btnOtro" type="button">Registrar otro cliente</button>
     </section>
 
-    <p class="legal">Válido del 25/09 al 27/09/2026 o hasta agotar stock. Stock: 100 Honor Choice Robot Vacuum Cleaner y 50 Honor Choice Hair Dryer a nivel nacional. Máximo 1 regalo de cada tipo por DNI. Condiciones en entel.pe/términos-y-condiciones/</p>
+    <p class="legal">Válido del 25/09 al 27/09/2026 o hasta agotar stock. Stock: 100 Honor Choice Robot Vacuum Cleaner y 50 Honor Choice Hair Dryer a nivel nacional. Un regalo por cada equipo Honor 600 u Honor 600e comprado. Condiciones en entel.pe/términos-y-condiciones/</p>
     <div class="foot"><a href="#equipo" id="linkEquipo">Acceso equipo</a></div>
   </main>
 </div>
@@ -363,6 +379,7 @@ td .btn{height:34px;font-size:13px;padding:0 12px;white-space:nowrap}
         <div class="filters">
           <div><label for="fBuscar">Buscar</label><input id="fBuscar" type="text" placeholder="Nombre, DNI, código o tienda"></div>
           <div><label for="fEstado">Estado</label><select id="fEstado"><option value="">Todos</option><option>Pendiente</option><option>Entregado</option></select></div>
+          <div><label for="fBoleta">Boleta</label><select id="fBoleta"><option value="">Todas</option><option value="rev">Por revisar</option><option value="ok">OK</option></select></div>
           <div><label for="fRegalo">Regalo</label><select id="fRegalo"><option value="">Todos</option><option value="HONOR_600">Robot Vacuum Cleaner</option><option value="HONOR_600E">Hair Dryer</option></select></div>
           <div><label for="fDepartamento">Departamento</label><select id="fDepartamento"><option value="">Todos</option></select></div>
           <div><label for="fProvincia">Provincia</label><select id="fProvincia"><option value="">Todas</option></select></div>
@@ -389,6 +406,7 @@ const configurado = API_URL.startsWith('https://script.google.com/');
 const PERU = {"Amazonas": ["Chachapoyas", "Bagua", "Bongará", "Condorcanqui", "Luya", "Rodríguez de Mendoza", "Utcubamba"], "Áncash": ["Huaraz", "Aija", "Antonio Raymondi", "Asunción", "Bolognesi", "Carhuaz", "Carlos Fermín Fitzcarrald", "Casma", "Corongo", "Huari", "Huarmey", "Huaylas", "Mariscal Luzuriaga", "Ocros", "Pallasca", "Pomabamba", "Recuay", "Santa", "Sihuas", "Yungay"], "Apurímac": ["Abancay", "Andahuaylas", "Antabamba", "Aymaraes", "Cotabambas", "Chincheros", "Grau"], "Arequipa": ["Arequipa", "Camaná", "Caravelí", "Castilla", "Caylloma", "Condesuyos", "Islay", "La Unión"], "Ayacucho": ["Huamanga", "Cangallo", "Huanca Sancos", "Huanta", "La Mar", "Lucanas", "Parinacochas", "Páucar del Sara Sara", "Sucre", "Víctor Fajardo", "Vilcas Huamán"], "Cajamarca": ["Cajamarca", "Cajabamba", "Celendín", "Chota", "Contumazá", "Cutervo", "Hualgayoc", "Jaén", "San Ignacio", "San Marcos", "San Miguel", "San Pablo", "Santa Cruz"], "Callao": ["Callao"], "Cusco": ["Cusco", "Acomayo", "Anta", "Calca", "Canas", "Canchis", "Chumbivilcas", "Espinar", "La Convención", "Paruro", "Paucartambo", "Quispicanchi", "Urubamba"], "Huancavelica": ["Huancavelica", "Acobamba", "Angaraes", "Castrovirreyna", "Churcampa", "Huaytará", "Tayacaja"], "Huánuco": ["Huánuco", "Ambo", "Dos de Mayo", "Huacaybamba", "Huamalíes", "Leoncio Prado", "Marañón", "Pachitea", "Puerto Inca", "Lauricocha", "Yarowilca"], "Ica": ["Ica", "Chincha", "Nasca", "Palpa", "Pisco"], "Junín": ["Huancayo", "Concepción", "Chanchamayo", "Jauja", "Junín", "Satipo", "Tarma", "Yauli", "Chupaca"], "La Libertad": ["Trujillo", "Ascope", "Bolívar", "Chepén", "Julcán", "Otuzco", "Pacasmayo", "Pataz", "Sánchez Carrión", "Santiago de Chuco", "Gran Chimú", "Virú"], "Lambayeque": ["Chiclayo", "Ferreñafe", "Lambayeque"], "Lima": ["Lima", "Barranca", "Cajatambo", "Canta", "Cañete", "Huaral", "Huarochirí", "Huaura", "Oyón", "Yauyos"], "Loreto": ["Maynas", "Alto Amazonas", "Loreto", "Mariscal Ramón Castilla", "Requena", "Ucayali", "Datem del Marañón", "Putumayo"], "Madre de Dios": ["Tambopata", "Manu", "Tahuamanu"], "Moquegua": ["Mariscal Nieto", "General Sánchez Cerro", "Ilo"], "Pasco": ["Pasco", "Daniel Alcides Carrión", "Oxapampa"], "Piura": ["Piura", "Ayabaca", "Huancabamba", "Morropón", "Paita", "Sullana", "Talara", "Sechura"], "Puno": ["Puno", "Azángaro", "Carabaya", "Chucuito", "El Collao", "Huancané", "Lampa", "Melgar", "Moho", "San Antonio de Putina", "San Román", "Sandia", "Yunguyo"], "San Martín": ["Moyobamba", "Bellavista", "El Dorado", "Huallaga", "Lamas", "Mariscal Cáceres", "Picota", "Rioja", "San Martín", "Tocache"], "Tacna": ["Tacna", "Candarave", "Jorge Basadre", "Tarata"], "Tumbes": ["Tumbes", "Contralmirante Villar", "Zarumilla"], "Ucayali": ["Coronel Portillo", "Atalaya", "Padre Abad", "Purús"]};
 let stock = {};
 let boletaDataUrl = null;
+let cantidad = 1;
 let pinActual = null;
 let registros = [];
 let ultimoStock = {};
@@ -458,9 +476,28 @@ function aplicarStock(s){
       t.querySelector('.left').textContent = 'Quedan ' + d.disponibles + ' de ' + d.stock;
     }
   });
+  pintarCantidad();
 }
 
 const ordenar = (arr) => [...arr].sort((x, y) => x.localeCompare(y, 'es'));
+
+function maxCantidad(){
+  const prod = document.querySelector('input[name=producto]:checked');
+  // Sin límite por cliente: el único tope es el stock disponible del regalo
+  const disp = prod && stock[prod.value] ? stock[prod.value].disponibles : Infinity;
+  return Math.max(1, disp);
+}
+function pintarCantidad(){
+  const prod = document.querySelector('input[name=producto]:checked');
+  $('#qtyBox').classList.toggle('hidden', !prod);
+  if (prod) $('#qtyTitulo').textContent = 'Cantidad de ' + (prod.value === 'HONOR_600E' ? 'Honor 600e' : 'Honor 600');
+  cantidad = Math.min(Math.max(1, cantidad), maxCantidad());
+  $('#qty').textContent = cantidad;
+  $('#qtyMenos').disabled = cantidad <= 1;
+  $('#qtyMas').disabled = cantidad >= maxCantidad();
+}
+$('#qtyMenos').addEventListener('click', () => { cantidad--; pintarCantidad(); });
+$('#qtyMas').addEventListener('click', () => { cantidad++; pintarCantidad(); });
 
 function pintarDepartamentos(){
   const sel = $('#departamento');
@@ -531,7 +568,7 @@ $('#departamento').addEventListener('change', () => {
 });
 $('#provincia').addEventListener('change', () => { guardar('sd_provincia', $('#provincia').value); $('#f-provincia').classList.remove('invalid'); });
 $('#tienda').addEventListener('change', () => guardar('sd_tienda', $('#tienda').value.trim()));
-document.querySelectorAll('input[name=producto]').forEach(r => r.addEventListener('change', () => $('#f-producto').classList.remove('invalid')));
+document.querySelectorAll('input[name=producto]').forEach(r => r.addEventListener('change', () => { $('#f-producto').classList.remove('invalid'); pintarCantidad(); }));
 ['nombre','dni','celular','tienda'].forEach(id => $('#'+id).addEventListener('input', () => $('#f-'+id).classList.remove('invalid')));
 
 function validar(){
@@ -554,7 +591,7 @@ function validar(){
   });
   if (primero) primero.scrollIntoView({behavior:'smooth', block:'center'});
   return primero ? null : {
-    accion:'registrar', productoId: prod.value, nombre, dni: $('#dni').value,
+    accion:'registrar', productoId: prod.value, cantidad, nombre, dni: $('#dni').value,
     celular: $('#celular').value, departamento: $('#departamento').value,
     provincia: $('#provincia').value, tienda: $('#tienda').value.trim(), boleta: boletaDataUrl
   };
@@ -567,7 +604,7 @@ $('#form').addEventListener('submit', async (e) => {
   if (!configurado){ mostrarError('Falta conectar el formulario con Apps Script (API_URL).'); return; }
   const datos = validar(); if (!datos) return;
   const btn = $('#btnEnviar');
-  btn.disabled = true; btn.innerHTML = '<span class="spinner"></span> Registrando…';
+  btn.disabled = true; btn.innerHTML = '<span class="spinner"></span> Revisando boleta y registrando…';
   try{
     const res = await apiPost(datos);
     if (res.stock) aplicarStock(res.stock);
@@ -575,8 +612,9 @@ $('#form').addEventListener('submit', async (e) => {
     $('#exCodigo').textContent = res.codigo;
     $('#exNombre').textContent = res.nombre;
     $('#exDni').textContent = res.dni;
-    $('#exEquipo').textContent = res.equipo;
-    $('#exRegalo').textContent = res.regalo;
+    $('#exEquipo').textContent = (res.cantidad > 1 ? res.cantidad + ' × ' : '') + res.equipo;
+    $('#exRegalo').textContent = (res.cantidad > 1 ? res.cantidad + ' × ' : '') + res.regalo;
+    $('#exRevisar').classList.toggle('hidden', !res.revisar);
     $('#exTienda').textContent = res.tienda + ' (' + $('#provincia').value + ', ' + $('#departamento').value + ')';
     guardar('sd_tienda', res.tienda);
     $('#form').classList.add('hidden');
@@ -597,6 +635,7 @@ function mostrarError(msg){
 $('#btnOtro').addEventListener('click', () => {
   // Se conservan departamento, provincia y tienda (mismo promotor)
   document.querySelectorAll('input[name=producto]').forEach(r => r.checked = false);
+  cantidad = 1; pintarCantidad();
   ['nombre','dni','celular'].forEach(id => $('#'+id).value = '');
   $('#boleta').value = ''; boletaDataUrl = null;
   $('#uploadBox').classList.remove('has'); $('#thumb').style.backgroundImage = '';
@@ -663,8 +702,10 @@ function pintarFiltroProvincias(){
 
 function pintarStats(s){
   ultimoStock = s;
-  const pend = registros.filter(r => r.estado !== 'Entregado').length;
-  const entr = registros.length - pend;
+  const uds = (lista) => lista.reduce((n, r) => n + (Number(r.cantidad) || 1), 0);
+  const pend = uds(registros.filter(r => r.estado !== 'Entregado'));
+  const entr = uds(registros.filter(r => r.estado === 'Entregado'));
+  const rev = registros.filter(porRevisar).length;
   let html = '';
   Object.values(s).forEach(d => {
     const pct = d.stock ? Math.min(100, d.registrados / d.stock * 100) : 0;
@@ -673,19 +714,23 @@ function pintarStats(s){
       <div class="bar"><i style="width:${pct}%"></i></div>
       <div class="k" style="margin-top:6px">Quedan ${d.disponibles}</div></div>`;
   });
-  html += `<div class="stat"><div class="k">Pendientes de entrega</div><div class="v">${pend}</div></div>`;
-  html += `<div class="stat"><div class="k">Entregados</div><div class="v">${entr}</div></div>`;
+  html += `<div class="stat"><div class="k">Regalos pendientes de entrega</div><div class="v">${pend}</div></div>`;
+  html += `<div class="stat"><div class="k">Regalos entregados</div><div class="v">${entr}</div></div>`;
+  html += `<div class="stat"><div class="k">Boletas por revisar</div><div class="v">${rev}</div></div>`;
   $('#stats').innerHTML = html;
 }
 
+function porRevisar(r){ return String(r.revision || '').startsWith('Revisar'); }
+
 function filtrados(){
   const q = $('#fBuscar').value.trim().toLowerCase();
-  const est = $('#fEstado').value, reg = $('#fRegalo').value,
+  const est = $('#fEstado').value, reg = $('#fRegalo').value, bol = $('#fBoleta').value,
         dep = $('#fDepartamento').value, prov = $('#fProvincia').value;
   return registros.filter(r =>
     (!est || r.estado === est) && (!reg || r.productoId === reg) &&
     (!dep || r.departamento === dep) && (!prov || r.provincia === prov) &&
-    (!q || [r.nombre, r.dni, r.codigo, r.celular, r.tienda].join(' ').toLowerCase().includes(q))
+    (!bol || (bol === 'rev') === porRevisar(r)) &&
+    (!q || [r.nombre, r.dni, r.codigo, r.celular, r.tienda, r.numeroBoleta].join(' ').toLowerCase().includes(q))
   );
 }
 
@@ -705,9 +750,10 @@ function pintarTabla(){
       <td>${esc(r.nombre)}</td>
       <td>${esc(r.dni)}</td>
       <td>${esc(r.celular)}</td>
-      <td>${esc(regaloCorto)}<br><span style="color:var(--muted)">${esc(r.equipo)}</span></td>
+      <td>${r.cantidad > 1 ? '<strong>' + r.cantidad + ' ×</strong> ' : ''}${esc(regaloCorto)}<br><span style="color:var(--muted)">${esc(r.equipo)}</span></td>
       <td>${esc(r.tienda)}<br><span style="color:var(--muted)">${esc(r.provincia)}, ${esc(r.departamento)}</span></td>
-      <td>${r.boleta ? `<a href="${esc(r.boleta)}" target="_blank" rel="noopener">Ver foto</a>` : '—'}</td>
+      <td>${r.boleta ? `<a href="${esc(r.boleta)}" target="_blank" rel="noopener">Ver foto</a>` : '—'}${r.numeroBoleta ? `<br><span style="color:var(--muted);font-size:12px">${esc(r.numeroBoleta)}</span>` : ''}
+        <br>${porRevisar(r) ? `<span class="tag rev" title="${esc(r.revision)}">Por revisar</span><br><span style="color:var(--muted);font-size:12px">${esc(String(r.revision).replace(/^Revisar:\s*/,''))}</span><br><button class="btn ghost" style="margin-top:4px" data-boletaok="${esc(r.codigo)}">Boleta OK</button>` : '<span class="tag okb">OK</span>'}</td>
       <td><span class="tag ${entregado ? 'entr' : 'pend'}">${esc(r.estado)}</span>${entregado && r.fechaEntrega ? `<br><span style="color:var(--muted);font-size:12px">${esc(r.fechaEntrega)}</span>` : ''}</td>
       <td><button class="btn ${entregado ? 'ghost' : 'blue'}" data-codigo="${esc(r.codigo)}" data-estado="${entregado ? 'Pendiente' : 'Entregado'}">${entregado ? 'Volver a pendiente' : 'Marcar entregado'}</button></td>
     </tr>`;
@@ -715,6 +761,19 @@ function pintarTabla(){
 }
 
 $('#tbody').addEventListener('click', async (e) => {
+  const ok = e.target.closest('button[data-boletaok]');
+  if (ok){
+    const codigo = ok.dataset.boletaok;
+    if (!confirm(`¿Revisaste la foto y la boleta de ${codigo} es válida?`)) return;
+    ok.disabled = true; ok.textContent = 'Guardando…';
+    try{
+      const res = await apiPost({accion:'boletaOK', pin: pinActual, codigo});
+      if (!res.ok){ alert(res.error); ok.disabled = false; ok.textContent = 'Boleta OK'; return; }
+      const r = registros.find(x => x.codigo === codigo); if (r) r.revision = res.revision;
+      pintarStats(ultimoStock); pintarTabla();
+    }catch(err){ alert('Sin conexión con el servidor.'); ok.disabled = false; ok.textContent = 'Boleta OK'; }
+    return;
+  }
   const b = e.target.closest('button[data-codigo]'); if (!b) return;
   const { codigo, estado } = b.dataset;
   const txt = estado === 'Entregado' ? `¿Confirmas que el regalo ${codigo} fue entregado?` : `¿Regresar ${codigo} a pendiente?`;
@@ -734,7 +793,7 @@ $('#tbody').addEventListener('click', async (e) => {
 // El stock no cambia al marcar entregas; se reutiliza el último resumen recibido
 function stockDesdeRegistros(){ return ultimoStock; }
 
-['fBuscar','fEstado','fRegalo','fProvincia'].forEach(id => $('#'+id).addEventListener('input', pintarTabla));
+['fBuscar','fEstado','fRegalo','fProvincia','fBoleta'].forEach(id => $('#'+id).addEventListener('input', pintarTabla));
 $('#fDepartamento').addEventListener('change', () => { pintarFiltroProvincias(); pintarTabla(); });
 
 $('#btnRefrescar').addEventListener('click', async () => {
