@@ -425,6 +425,7 @@ const configurado = API_URL.startsWith('https://script.google.com/');
 const PERU = {"Amazonas": ["Chachapoyas", "Bagua", "Bongará", "Condorcanqui", "Luya", "Rodríguez de Mendoza", "Utcubamba"], "Áncash": ["Huaraz", "Aija", "Antonio Raymondi", "Asunción", "Bolognesi", "Carhuaz", "Carlos Fermín Fitzcarrald", "Casma", "Corongo", "Huari", "Huarmey", "Huaylas", "Mariscal Luzuriaga", "Ocros", "Pallasca", "Pomabamba", "Recuay", "Santa", "Sihuas", "Yungay"], "Apurímac": ["Abancay", "Andahuaylas", "Antabamba", "Aymaraes", "Cotabambas", "Chincheros", "Grau"], "Arequipa": ["Arequipa", "Camaná", "Caravelí", "Castilla", "Caylloma", "Condesuyos", "Islay", "La Unión"], "Ayacucho": ["Huamanga", "Cangallo", "Huanca Sancos", "Huanta", "La Mar", "Lucanas", "Parinacochas", "Páucar del Sara Sara", "Sucre", "Víctor Fajardo", "Vilcas Huamán"], "Cajamarca": ["Cajamarca", "Cajabamba", "Celendín", "Chota", "Contumazá", "Cutervo", "Hualgayoc", "Jaén", "San Ignacio", "San Marcos", "San Miguel", "San Pablo", "Santa Cruz"], "Callao": ["Callao"], "Cusco": ["Cusco", "Acomayo", "Anta", "Calca", "Canas", "Canchis", "Chumbivilcas", "Espinar", "La Convención", "Paruro", "Paucartambo", "Quispicanchi", "Urubamba"], "Huancavelica": ["Huancavelica", "Acobamba", "Angaraes", "Castrovirreyna", "Churcampa", "Huaytará", "Tayacaja"], "Huánuco": ["Huánuco", "Ambo", "Dos de Mayo", "Huacaybamba", "Huamalíes", "Leoncio Prado", "Marañón", "Pachitea", "Puerto Inca", "Lauricocha", "Yarowilca"], "Ica": ["Ica", "Chincha", "Nasca", "Palpa", "Pisco"], "Junín": ["Huancayo", "Concepción", "Chanchamayo", "Jauja", "Junín", "Satipo", "Tarma", "Yauli", "Chupaca"], "La Libertad": ["Trujillo", "Ascope", "Bolívar", "Chepén", "Julcán", "Otuzco", "Pacasmayo", "Pataz", "Sánchez Carrión", "Santiago de Chuco", "Gran Chimú", "Virú"], "Lambayeque": ["Chiclayo", "Ferreñafe", "Lambayeque"], "Lima": ["Lima", "Barranca", "Cajatambo", "Canta", "Cañete", "Huaral", "Huarochirí", "Huaura", "Oyón", "Yauyos"], "Loreto": ["Maynas", "Alto Amazonas", "Loreto", "Mariscal Ramón Castilla", "Requena", "Ucayali", "Datem del Marañón", "Putumayo"], "Madre de Dios": ["Tambopata", "Manu", "Tahuamanu"], "Moquegua": ["Mariscal Nieto", "General Sánchez Cerro", "Ilo"], "Pasco": ["Pasco", "Daniel Alcides Carrión", "Oxapampa"], "Piura": ["Piura", "Ayabaca", "Huancabamba", "Morropón", "Paita", "Sullana", "Talara", "Sechura"], "Puno": ["Puno", "Azángaro", "Carabaya", "Chucuito", "El Collao", "Huancané", "Lampa", "Melgar", "Moho", "San Antonio de Putina", "San Román", "Sandia", "Yunguyo"], "San Martín": ["Moyobamba", "Bellavista", "El Dorado", "Huallaga", "Lamas", "Mariscal Cáceres", "Picota", "Rioja", "San Martín", "Tocache"], "Tacna": ["Tacna", "Candarave", "Jorge Basadre", "Tarata"], "Tumbes": ["Tumbes", "Contralmirante Villar", "Zarumilla"], "Ucayali": ["Coronel Portillo", "Atalaya", "Padre Abad", "Purús"]};
 let stock = {};
 const fotos = { boleta: null, fotoCliente: null };
+let idEnvio = null; // identifica el envío para no duplicar si se reintenta
 let cantidad = 1;
 let pinActual = null;
 let registros = [];
@@ -439,6 +440,24 @@ async function apiGet(accion){
   const r = await fetch(API_URL + '?accion=' + encodeURIComponent(accion));
   return r.json();
 }
+function nuevoId(){
+  try{ if (crypto.randomUUID) return crypto.randomUUID(); }catch(e){}
+  return Date.now().toString(36) + '-' + Math.random().toString(36).slice(2, 12);
+}
+const esperar = (ms) => new Promise(r => setTimeout(r, ms));
+async function buscarEnvio(id){
+  for (let i = 0; i < 3; i++){
+    try{
+      await esperar(2000 * (i + 1));
+      const r = await fetch(API_URL + '?accion=buscar&id=' + encodeURIComponent(id));
+      const res = await r.json();
+      if (res.encontrado) return res;
+      if (res.ok) return null;
+    }catch(e){}
+  }
+  return null;
+}
+
 async function apiPost(payload){
   const r = await fetch(API_URL, { method:'POST', headers:{'Content-Type':'text/plain;charset=utf-8'}, body: JSON.stringify(payload) });
   return r.json();
@@ -652,26 +671,43 @@ $('#form').addEventListener('submit', async (e) => {
   const datos = validar(); if (!datos) return;
   const btn = $('#btnEnviar');
   btn.disabled = true; btn.innerHTML = '<span class="spinner"></span> Registrando…';
+  if (!idEnvio) idEnvio = nuevoId();
+  datos.idEnvio = idEnvio;
   try{
-    const res = await apiPost(datos);
+    let res;
+    try{
+      res = await apiPost(datos);
+    }catch(err){
+      // La respuesta no llegó: se consulta si el registro igual quedó guardado
+      btn.innerHTML = '<span class="spinner"></span> Confirmando registro…';
+      res = await buscarEnvio(idEnvio);
+      if (!res){
+        mostrarError('No se pudo confirmar el registro por la conexión. Presiona "Registrar regalo" otra vez: no se duplicará.');
+        return;
+      }
+    }
     if (res.stock) aplicarStock(res.stock);
     if (!res.ok){ mostrarError(res.error || 'No se pudo registrar.'); return; }
-    $('#exCodigo').textContent = res.codigo;
-    $('#exNombre').textContent = res.nombre;
-    $('#exDni').textContent = res.dni;
-    $('#exEquipo').textContent = (res.cantidad > 1 ? res.cantidad + ' × ' : '') + res.equipo;
-    $('#exRegalo').textContent = (res.cantidad > 1 ? res.cantidad + ' × ' : '') + res.regalo;
-    $('#exTienda').textContent = res.tienda + ' (' + $('#provincia').value + ', ' + $('#departamento').value + ')';
-    guardar('sd_tienda', res.tienda);
-    $('#form').classList.add('hidden');
-    $('#exito').classList.remove('hidden');
-    window.scrollTo({top: $('#exito').offsetTop - 20, behavior:'smooth'});
-  }catch(err){
-    mostrarError('Sin conexión con el servidor. Revisa internet y presiona "Registrar regalo" otra vez.');
+    mostrarExito(res);
   }finally{
     btn.disabled = false; btn.textContent = 'Registrar regalo';
   }
 });
+
+function mostrarExito(res){
+  idEnvio = null;
+  const x = res.cantidad > 1 ? res.cantidad + ' × ' : '';
+  $('#exCodigo').textContent = res.codigo;
+  $('#exNombre').textContent = res.nombre;
+  $('#exDni').textContent = res.dni;
+  $('#exEquipo').textContent = x + res.equipo;
+  $('#exRegalo').textContent = x + res.regalo;
+  $('#exTienda').textContent = res.tienda + ' (' + res.provincia + ', ' + res.departamento + ')';
+  guardar('sd_tienda', res.tienda);
+  $('#form').classList.add('hidden');
+  $('#exito').classList.remove('hidden');
+  window.scrollTo({top: $('#exito').offsetTop - 20, behavior:'smooth'});
+}
 
 function mostrarError(msg){
   const b = $('#formError'); b.textContent = msg; b.classList.remove('hidden');
