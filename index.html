@@ -261,9 +261,9 @@ td .btn{height:34px;font-size:13px;padding:0 12px;white-space:nowrap}
         </div>
         <div class="row2">
           <div class="field" id="f-dni">
-            <label for="dni">DNI</label>
-            <input type="tel" id="dni" inputmode="numeric" maxlength="8" autocomplete="off">
-            <div class="err">Debe tener 8 dígitos.</div>
+            <label for="dni">DNI o CE</label>
+            <input type="text" id="dni" maxlength="12" autocomplete="off" autocapitalize="characters" spellcheck="false">
+            <div class="err">De 8 a 12 letras o números.</div>
           </div>
           <div class="field" id="f-celular">
             <label for="celular">Celular</label>
@@ -335,12 +335,12 @@ td .btn{height:34px;font-size:13px;padding:0 12px;white-space:nowrap}
       <div class="msg">Te contactaremos cuando el regalo esté en tienda.</div>
       <dl>
         <dt>Cliente</dt><dd id="exNombre"></dd>
-        <dt>DNI</dt><dd id="exDni"></dd>
+        <dt>DNI o CE</dt><dd id="exDni"></dd>
         <dt>Equipo</dt><dd id="exEquipo"></dd>
         <dt>Regalo</dt><dd id="exRegalo"></dd>
         <dt>Recojo en</dt><dd id="exTienda"></dd>
       </dl>
-      <p class="keep">Guarda este código y muestra tu DNI al recoger tu regalo.</p>
+      <p class="keep">Guarda este código y muestra tu DNI o CE al recoger tu regalo.</p>
       <button class="btn primary" id="btnOtro" type="button">Registrar otro cliente</button>
       <button class="btn ghost" id="btnMismo" type="button" style="width:100%;margin-top:10px;height:50px">Registrar otro equipo para este cliente</button>
     </section>
@@ -397,7 +397,7 @@ td .btn{height:34px;font-size:13px;padding:0 12px;white-space:nowrap}
       <div class="box">
         <h2>Clientes registrados</h2>
         <div class="filters">
-          <div><label for="fBuscar">Buscar</label><input id="fBuscar" type="text" placeholder="Nombre, DNI, código o tienda"></div>
+          <div><label for="fBuscar">Buscar</label><input id="fBuscar" type="text" placeholder="Nombre, DNI/CE, código o tienda"></div>
           <div><label for="fEstado">Estado</label><select id="fEstado"><option value="">Todos</option><option>Pendiente</option><option>Entregado</option></select></div>
           <div><label for="fRegalo">Regalo</label><select id="fRegalo"><option value="">Todos</option><option value="HONOR_600">Robot Vacuum Cleaner</option><option value="HONOR_600E">Hair Dryer</option></select></div>
           <div><label for="fDepartamento">Departamento</label><select id="fDepartamento"><option value="">Todos</option></select></div>
@@ -406,7 +406,7 @@ td .btn{height:34px;font-size:13px;padding:0 12px;white-space:nowrap}
         <div class="count" id="conteo"></div>
         <div class="table-wrap">
           <table>
-            <thead><tr><th>Código</th><th>Fecha</th><th>Cliente</th><th>DNI</th><th>Celular</th><th>Regalo</th><th>Tienda</th><th>Fotos</th><th>Estado</th><th></th></tr></thead>
+            <thead><tr><th>Código</th><th>Fecha</th><th>Cliente</th><th>DNI / CE</th><th>Celular</th><th>Regalo</th><th>Tienda</th><th>Fotos</th><th>Estado</th><th></th></tr></thead>
             <tbody id="tbody"></tbody>
           </table>
         </div>
@@ -604,7 +604,8 @@ function limpiarFoto(id){
 $('#consentimiento').addEventListener('change', () => $('#f-consentimiento').classList.remove('invalid'));
 
 /* ---------- Validación ---------- */
-['dni','celular'].forEach(id => $('#'+id).addEventListener('input', e => { e.target.value = e.target.value.replace(/\D/g,''); }));
+$('#dni').addEventListener('input', e => { e.target.value = e.target.value.toUpperCase().replace(/[^A-Z0-9]/g,''); });
+$('#celular').addEventListener('input', e => { e.target.value = e.target.value.replace(/\D/g,''); });
 $('#departamento').addEventListener('change', () => {
   pintarProvincias(); guardar('sd_departamento', $('#departamento').value);
   guardar('sd_provincia', $('#provincia').value); $('#f-departamento').classList.remove('invalid');
@@ -620,7 +621,7 @@ function validar(){
   const checks = {
     producto: !!prod,
     nombre: nombre.length >= 5 && nombre.includes(' '),
-    dni: /^\d{8}$/.test($('#dni').value),
+    dni: /^[A-Z0-9]{8,12}$/.test($('#dni').value),
     celular: /^9\d{8}$/.test($('#celular').value),
     departamento: !!$('#departamento').value,
     provincia: !!$('#provincia').value,
